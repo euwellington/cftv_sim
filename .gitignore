@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.idea/
+.vscode/
+
+# binarios baixados pelo instalador
+bin/
+
+# dados gerados em execucao
+storage/
+data/
+logs/
+config/profiles/*.json
+!config/profiles/.gitkeep
+
+# logos de terceiros (marcas registradas): cada usuario coloca as suas
+assets/logos/*.png
+assets/logos/*.svg
+assets/logos/*.jpg

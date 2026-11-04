@@ -1,0 +1,2 @@
+# Opcional: tema escuro pronto (o projeto ja traz theme.qss proprio)
+pyqtdarktheme>=2.1

@@ -1,0 +1,71 @@
+{
+  "app": {
+    "name": "CFTV Simulator",
+    "language": "pt-BR",
+    "log_level": "INFO"
+  },
+  "capture": {
+    "camera_index": 0,
+    "width": 1280,
+    "height": 720,
+    "fps": 25,
+    "force_test_pattern": false,
+    "reconnect_interval_s": 10
+  },
+  "simulation": {
+    "reboot_seconds": [20, 40],
+    "video_loss_after_s": 3.0,
+    "motion_hold_s": 3.0,
+    "motion_warmup_frames": 20
+  },
+  "ports": {
+    "prefer_standard": false,
+    "web_portal": 8800,
+    "mediamtx_rtsp_internal": 18554,
+    "mediamtx_webrtc": 8889,
+    "mediamtx_hls": 8888,
+    "mediamtx_api": 9997,
+    "hikvision_http_start": 8080,
+    "intelbras_http_start": 8090,
+    "rtsp_start": 8554
+  },
+  "security": {
+    "min_password_length": 10,
+    "lockout_attempts": 5,
+    "lockout_window_s": 900,
+    "lockout_duration_s": 1800,
+    "session_ttl_s": 28800,
+    "allow_basic_auth": false,
+    "force_password_change_first_login": false
+  },
+  "recording": {
+    "segment_seconds": 60,
+    "pre_event_seconds": 10,
+    "post_event_seconds": 15,
+    "ring_segment_seconds": 2,
+    "overwrite": true,
+    "default_mode": "continuous"
+  },
+  "storage": {
+    "root": "storage",
+    "disks": [
+      { "id": "hdd1", "capacity_gb": 4.0 }
+    ]
+  },
+  "streaming": {
+    "x264_preset": "veryfast",
+    "x264_tune": "zerolatency",
+    "gop": 50,
+    "main": { "width": 1280, "height": 720, "fps": 25, "bitrate_kbps": 2048 },
+    "sub":  { "width": 640,  "height": 360, "fps": 15, "bitrate_kbps": 512 }
+  },
+  "discovery": {
+    "onvif_ws_discovery": true,
+    "hikvision_sadp": false,
+    "intelbras_dhip": false
+  },
+  "tunnel": {
+    "provider": "cloudflare",
+    "expose_brand_apis": false
+  }
+}

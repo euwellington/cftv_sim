@@ -1,0 +1,37 @@
+# cftv_sim - dependencias Python (Python 3.11+)
+# Binarios externos (baixados por tools/fetch_binaries.py): FFmpeg, MediaMTX, cloudflared
+# Opcionais: ngrok, tailscale (ver requirements-optional.txt)
+
+# --- GUI ---
+PyQt6>=6.6
+qtawesome>=1.3
+
+# --- Video ---
+# headless: o opencv-python completo traz plugins Qt que conflitam com o PyQt6
+opencv-python-headless>=4.9
+numpy>=1.26
+
+# --- Servidor / APIs ---
+fastapi>=0.110
+uvicorn[standard]>=0.29
+jinja2>=3.1
+python-multipart>=0.0.9
+lxml>=5.0
+httpx>=0.27
+slowapi>=0.1.9
+
+# --- Dados / config ---
+sqlalchemy>=2.0
+pydantic>=2.6
+
+# --- Sistema / utilitarios ---
+psutil>=5.9
+qrcode[pil]>=7.4
+
+# --- ONVIF / descoberta ---
+WSDiscovery>=2.0
+
+# --- Testes ---
+pytest>=8.0
+pytest-asyncio>=0.23
+onvif-zeep>=0.2.12
