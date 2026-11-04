@@ -154,11 +154,13 @@ class Database:
         with self.session() as s:
             return int(s.scalar(q) or 0)
 
-    def oldest_segments(self, disk: str, limit: int = 20) -> list[Segment]:
+    def oldest_segments(self, disk: str, limit: int = 20, device_id: str | None = None) -> list[Segment]:
         """Mais antigos primeiro (para o overwrite por cota)."""
+        q = select(Segment).where(Segment.disk == disk).order_by(Segment.start).limit(limit)
+        if device_id:
+            q = q.where(Segment.device_id == device_id)
         with self.session() as s:
-            return list(s.scalars(select(Segment).where(Segment.disk == disk)
-                                  .order_by(Segment.start).limit(limit)))
+            return list(s.scalars(q))
 
     def delete_segments(self, ids: Sequence[int]) -> None:
         if not ids:
@@ -167,11 +169,12 @@ class Database:
             s.execute(delete(Segment).where(Segment.id.in_(list(ids))))
             s.commit()
 
-    def clear_disk(self, disk: str) -> list[str]:
+    def clear_disk(self, disk: str, device_id: str | None = None) -> list[str]:
         """Remove do indice todos os segmentos do disco ("Formatar"). Retorna os caminhos."""
+        cond = [Segment.disk == disk] + ([Segment.device_id == device_id] if device_id else [])
         with self.session() as s:
-            paths = list(s.scalars(select(Segment.path).where(Segment.disk == disk)))
-            s.execute(delete(Segment).where(Segment.disk == disk))
+            paths = list(s.scalars(select(Segment.path).where(*cond)))
+            s.execute(delete(Segment).where(*cond))
             s.commit()
         return paths
 

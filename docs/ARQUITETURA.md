@@ -152,8 +152,8 @@ Ver a árvore completa no prompt de origem. Estado por etapa:
 | 2 | `streaming/` + `recording/` | pendente |
 | 3 | `api/` + `brands/hikvision/` | pendente |
 | 4 | `brands/intelbras/` | pendente |
-| 5 | `gui/` (tema, splash, wizard) | pendente |
-| 6 | `gui/pages` e widgets | pendente |
+| 5 | `gui/` (tema, splash, wizard) | feita |
+| 6 | `gui/pages` e widgets | feita |
 | 7 | `web/` | pendente |
 | 8 | `tunnel/` + segurança | pendente |
 | 9 | `tests/` + README completo | pendente |
