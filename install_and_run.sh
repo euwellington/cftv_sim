@@ -33,7 +33,7 @@ VPY=".venv/bin/python"
 
 echo "==> Instalando dependencias"
 "$VPY" -m pip install --upgrade pip >/dev/null
-"$VPY" -m pip install -r requirements.txt
+"$VPY" -m pip install -q -r requirements.txt
 
 if [ "$SKIP_BIN" -eq 0 ]; then
   echo "==> Baixando binarios (MediaMTX, FFmpeg, cloudflared)"
@@ -45,6 +45,12 @@ fi
 
 if [ "$NO_RUN" -eq 1 ]; then
   echo "==> Instalacao concluida. Execute: .venv/bin/python app.py"
+  exit 0
+fi
+
+if [ ! -f app.py ]; then
+  echo "==> Instalacao concluida. app.py ainda nao existe (a GUI chega na Etapa 5)."
+  echo "    Para validar o que existe: .venv/bin/python -m pytest tests/test_core.py"
   exit 0
 fi
 

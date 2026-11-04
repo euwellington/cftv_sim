@@ -39,7 +39,7 @@ $vpy = ".venv\Scripts\python.exe"
 
 Write-Host "==> Instalando dependencias"
 & $vpy -m pip install --upgrade pip | Out-Null
-& $vpy -m pip install -r requirements.txt
+& $vpy -m pip install -q -r requirements.txt
 if ($LASTEXITCODE -ne 0) { Write-Host "Falha ao instalar dependencias." -ForegroundColor Red; exit 1 }
 
 if (-not $SkipBin) {
@@ -56,6 +56,11 @@ Write-Host " - A webcam e aberta com CAP_DSHOW."
 
 if ($NoRun) {
   Write-Host "Instalacao concluida. Execute: .venv\Scripts\pythonw.exe app.py"
+  exit 0
+}
+if (-not (Test-Path "app.py")) {
+  Write-Host "Instalacao concluida. app.py ainda nao existe (a GUI chega na Etapa 5)." -ForegroundColor Yellow
+  Write-Host "Para validar: .venv\Scripts\python.exe -m pytest tests\test_core.py"
   exit 0
 }
 # pythonw = sem janela de terminal

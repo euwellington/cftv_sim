@@ -34,7 +34,7 @@ set "VPY=.venv\Scripts\python.exe"
 
 echo ==^> Instalando dependencias
 "%VPY%" -m pip install --upgrade pip >nul
-"%VPY%" -m pip install -r requirements.txt || goto :erro
+"%VPY%" -m pip install -q -r requirements.txt || goto :erro
 
 if "%SKIP_BIN%"=="0" (
   echo ==^> Baixando binarios ^(mediamtx.exe, ffmpeg.exe, cloudflared.exe^) em bin\
@@ -51,6 +51,12 @@ echo.
 
 if "%NO_RUN%"=="1" (
   echo Instalacao concluida. Execute: .venv\Scripts\pythonw.exe app.py
+  exit /b 0
+)
+
+if not exist app.py (
+  echo Instalacao concluida. app.py ainda nao existe ^(a GUI chega na Etapa 5^).
+  echo Para validar: .venv\Scripts\python.exe -m pytest tests\test_core.py
   exit /b 0
 )
 
