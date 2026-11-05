@@ -44,6 +44,10 @@ class AppContext:
         self.tunnel: Any = None  # TunnelProvider (etapa 8)
         self.public_url: str = ""
         self.started = False
+        self.tcp_endpoints: dict[int, tuple[str, int]] = {}  # porta RTSP local -> (host, porta) do ngrok TCP
+        self.public_ip = ""  # preenchido sob demanda (consulta externa)
+        self.admin_user = "admin"
+        self.admin_password = ""  # so em memoria (nunca gravada); vazia = desconhecida
         self._load_optional_services()
 
     # ------------------------------------------------------------------ servicos
@@ -130,6 +134,33 @@ class AppContext:
     def web_url(self, host: Optional[str] = None) -> str:
         return f"http://{host or self.host()}:{self.profile.web_port}"
 
+    def set_credentials(self, user: str, password: str) -> None:
+        self.admin_user, self.admin_password = user, password
+
+    def _rtsp_cred(self, pw: str) -> tuple[str, str]:
+        """Usuario/senha para a URL RTSP; vazios quando a autenticacao RTSP esta desligada."""
+        if not self.profile.rtsp_auth:
+            return "", ""
+        return self.admin_user, pw
+
+    def access_rows(self, host: Optional[str] = None, ngrok_tcp: bool = False) -> list[dict]:
+        """Linhas para a barra fixa: por equipamento/canal/stream, URL HTTP e RTSP reais."""
+        from . import urls
+        h = host or self.host()
+        pw = self.admin_password or "<senha>"
+        rows = []
+        for d in self.profile.devices:
+            for ch in d.channels:
+                for st, label in ((0, "principal"), (1, "extra")):
+                    ep = self.tcp_endpoints.get(d.rtsp_port) if ngrok_tcp else None
+                    hp = self.tcp_endpoints.get(d.http_port) if ngrok_tcp else None
+                    rows.append({"device": d.id, "name": d.name, "channel": ch.index, "stream": st,
+                                 "label": f"{d.name} - CH{ch.index} {label}",
+                                 "http": (urls.http_url(d, hp[0], self.admin_user, pw, hp[1]) if hp else urls.http_url(d, h, self.admin_user, pw)),
+                                 "rtsp": (urls.rtsp_url(d, ch.index, st, ep[0], *self._rtsp_cred(pw), ep[1]) if ep
+                                         else urls.rtsp_url(d, ch.index, st, h, *self._rtsp_cred(pw)))})
+        return rows
+
     def http_urls(self, host: Optional[str] = None) -> dict[str, str]:
         h = host or self.host()
         return {d.id: f"http://{h}:{d.http_port}" for d in self.profile.devices}
@@ -140,7 +171,9 @@ class AppContext:
         try:
             from tunnel.factory import create_provider
         except ModuleNotFoundError as exc:
-            raise RuntimeError("Modulo de tunel indisponivel nesta versao.") from exc
+            if exc.name and exc.name.split(".")[0] == "tunnel":
+                raise RuntimeError("Pasta 'tunnel/' ausente: copie o projeto atualizado inteiro.") from exc
+            raise RuntimeError(f"Dependencia ausente: {exc.name}. Rode: pip install -r requirements.txt") from exc
         if self.tunnel is not None:
             self.stop_tunnel()
         self.tunnel = create_provider(self)
@@ -155,3 +188,4 @@ class AppContext:
             finally:
                 self.tunnel = None
                 self.public_url = ""
+                self.tcp_endpoints = {}

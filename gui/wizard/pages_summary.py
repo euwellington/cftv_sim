@@ -88,5 +88,6 @@ class SummaryPage(QWizardPage):
         except ProfileError as exc:
             self.err.setText(str(exc))
             return False
-        d["admin_password"] = ""  # nao manter a senha em memoria alem do necessario
+        d["_session_pw"] = d["admin_password"]  # so memoria; usada na barra de URLs
+        d["admin_password"] = ""
         return True

@@ -37,6 +37,7 @@ class AccessPage(QWizardPage):
         self.provider.addItem("Cloudflare Tunnel - quick tunnel (sem conta) [padrao]", "cloudflare")
         self.provider.addItem("ngrok (requer authtoken)", "ngrok")
         self.provider.addItem("Tailscale Funnel", "tailscale")
+        self.provider.addItem("TCP publico sem conta - bore/pinggy (RTSP/HTTP de fora)", "bore")
         self.token = QLineEdit()
         self.token.setPlaceholderText("authtoken do ngrok")
         self.token.setEchoMode(QLineEdit.EchoMode.Password)

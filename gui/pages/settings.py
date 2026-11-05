@@ -500,7 +500,7 @@ class SettingsPage(BasePage):
         self.t_enabled.setChecked(pub.enabled)
         self.t_provider = QComboBox()
         for k, t in (("cloudflare", "Cloudflare Tunnel (quick tunnel, sem conta)"), ("ngrok", "ngrok"),
-                     ("tailscale", "Tailscale Funnel")):
+                     ("tailscale", "Tailscale Funnel"), ("bore", "TCP publico sem conta - bore/pinggy (RTSP/HTTP)")):
             self.t_provider.addItem(t, k)
         self.t_provider.setCurrentIndex(max(0, self.t_provider.findData(pub.provider)))
         self.t_token = QLineEdit(pub.ngrok_authtoken)
@@ -509,6 +509,9 @@ class SettingsPage(BasePage):
         self.t_tcp.setChecked(pub.ngrok_tcp_rtsp)
         self.t_expose = QCheckBox("Expor as APIs ISAPI/CGI das marcas pela internet (desligado por padrao)")
         self.t_expose.setChecked(pub.expose_brand_apis)
+        self.t_rtsp_auth = QCheckBox("RTSP exige autenticacao (usuario e senha)")
+        self.t_rtsp_auth.setChecked(self.ctx.profile.rtsp_auth)
+        form.addRow("", self.t_rtsp_auth)
         form.addRow("", self.t_enabled)
         form.addRow("Provedor", self.t_provider)
         form.addRow("Authtoken ngrok", self.t_token)
@@ -523,9 +526,10 @@ class SettingsPage(BasePage):
 
     def _save_tunnel(self) -> None:
         pub = self.ctx.profile.public
+        self.ctx.profile.rtsp_auth = self.t_rtsp_auth.isChecked()
         pub.enabled = self.t_enabled.isChecked()
         pub.provider = self.t_provider.currentData()
         pub.ngrok_authtoken = self.t_token.text().strip()
         pub.ngrok_tcp_rtsp = self.t_tcp.isChecked()
         pub.expose_brand_apis = self.t_expose.isChecked()
-        self._saved("Configuracao de tunel salva (a opcao de expor APIs vale no proximo inicio).")
+        self._saved("Configuracao salva (RTSP com/sem autenticacao vale na hora; a opcao de expor APIs vale no proximo inicio).")

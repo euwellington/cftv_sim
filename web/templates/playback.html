@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block body %}
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+<select id="cam">{% for c in cams %}<option value="{{ c.dev }}|{{ c.ch }}">{{ c.device }} - {{ c.name }}</option>{% endfor %}</select>
+<input type="date" id="date" value="{{ today }}"><button class="p" onclick="load()">Buscar</button></div>
+<video id="vid" controls style="width:100%;max-width:960px;background:#000;border-radius:8px"></video>
+<table><thead><tr><th>Inicio</th><th>Fim</th><th>Tipo</th><th>Tamanho</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+{% endblock %}
+{% block script %}
+<script>
+async function load(){const [d,c]=document.getElementById('cam').value.split('|');const r=await fetch(`/api/v1/recordings?dev=${d}&ch=${c}&date=${document.getElementById('date').value}`);
+const j=await r.json();document.getElementById('rows').innerHTML=j.length?j.map(x=>`<tr><td>${x.start}</td><td>${x.end}</td><td>${x.kind}</td><td>${(x.size/1048576).toFixed(1)} MB</td><td><button onclick="play(${x.id})">Reproduzir</button></td></tr>`).join(''):'<tr><td colspan=5>Sem gravacoes neste dia.</td></tr>'}
+function play(id){const v=document.getElementById('vid');v.src='/rec/'+id;v.play()}
+load();
+</script>
+{% endblock %}

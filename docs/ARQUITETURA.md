@@ -149,11 +149,11 @@ Ver a árvore completa no prompt de origem. Estado por etapa:
 |---|---|---|
 | 0 | Arquitetura | feita |
 | 1 | requirements, instaladores, config, `core/` | feita |
-| 2 | `streaming/` + `recording/` | pendente |
-| 3 | `api/` + `brands/hikvision/` | pendente |
-| 4 | `brands/intelbras/` | pendente |
+| 2 | `streaming/` + `recording/` | feita (MediaMTX nao testado no sandbox) |
+| 3 | `api/` + `brands/hikvision/` | parcial (ISAPI essencial; faltam ONVIF, SADP, SDK 8000) |
+| 4 | `brands/intelbras/` | parcial (CGI essencial; faltam ONVIF, DHIP, 37777) |
 | 5 | `gui/` (tema, splash, wizard) | feita |
 | 6 | `gui/pages` e widgets | feita |
-| 7 | `web/` | pendente |
-| 8 | `tunnel/` + segurança | pendente |
+| 7 | `web/` | feita (video via MJPEG; WebRTC/HLS pendente) |
+| 8 | `tunnel/` + segurança | feita (Cloudflare/ngrok/Tailscale; nao testado com binarios reais) |
 | 9 | `tests/` + README completo | pendente |

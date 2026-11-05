@@ -152,7 +152,7 @@ class DeviceSpec(BaseModel):
 
 class PublicAccess(BaseModel):
     enabled: bool = False
-    provider: Literal["cloudflare", "ngrok", "tailscale"] = "cloudflare"
+    provider: Literal["cloudflare", "ngrok", "tailscale", "bore", "pinggy"] = "cloudflare"
     ngrok_authtoken: str = ""
     expose_brand_apis: bool = False  # APIs ISAPI/CGI pela internet: desligado por padrao
     ngrok_tcp_rtsp: bool = False
@@ -167,6 +167,7 @@ class Profile(BaseModel):
     devices: list[DeviceSpec] = Field(default_factory=list)
     public: PublicAccess = Field(default_factory=PublicAccess)
     web_port: int = 8800
+    rtsp_auth: bool = True  # False => RTSP aberto, sem usuario/senha
     settings: dict = Field(default_factory=dict)  # sobrescritas de default.json
 
     @field_validator("name")

@@ -307,16 +307,9 @@ class DeviceManager:
     def rtsp_urls(self, device_id: str, host: str = "127.0.0.1", user: str = "admin",
                   password: str = "<senha>") -> list[str]:
         """URLs RTSP de ao vivo (principal e extra) para copiar na GUI."""
+        from . import urls as _u
         d = self.devices[device_id].spec
-        urls: list[str] = []
-        for ch in d.channels:
-            for stream in (0, 1):
-                if d.brand is Brand.HIKVISION:
-                    path = f"Streaming/Channels/{ch.index * 100 + stream + 1}"
-                else:
-                    path = f"cam/realmonitor?channel={ch.index}&subtype={stream}"
-                urls.append(f"rtsp://{user}:{password}@{host}:{d.rtsp_port}/{path}")
-        return urls
+        return [_u.rtsp_url(d, ch.index, st, host, user, password) for ch in d.channels for st in (0, 1)]
 
     # ------------------------------------------------------------------ persistencia de eventos
     def _start_writer(self) -> None:

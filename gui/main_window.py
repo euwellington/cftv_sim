@@ -128,6 +128,8 @@ class MainWindow(QMainWindow):
         for w in (self.c_source, self.c_state, self.c_tunnel, self.clock):
             hl.addWidget(w)
         right.addWidget(header)
+        from .widgets.endpoint_bar import EndpointBar
+        right.addWidget(EndpointBar(self.ctx))
         right.addWidget(self.stack, 1)
         outer.addLayout(right, 1)
 

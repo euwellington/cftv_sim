@@ -34,3 +34,6 @@ class ProfileWizard(QWizard):
     def result_profile(self) -> Optional[Profile]:
         """Perfil pronto (apos ``exec()`` aceito)."""
         return self.data.get("final_profile")
+
+    def result_credentials(self) -> tuple[str, str]:
+        return self.data.get("admin_user", "admin"), self.data.get("_session_pw", "")

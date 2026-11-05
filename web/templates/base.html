@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}CFTV Portal{% endblock %}</title>
+<style>
+:root{--bg:#0f1115;--panel:#181b22;--line:#2a2f3a;--txt:#e6e8ee;--mut:#8b93a5;--acc:{% if brand=='hikvision' %}#e60012{% elif brand=='intelbras' %}#00a335{% else %}#3b82f6{% endif %}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px system-ui,Segoe UI,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--panel);border-bottom:2px solid var(--acc);flex-wrap:wrap}
+header b{font-size:16px}nav a{color:var(--mut);text-decoration:none;padding:6px 10px;border-radius:6px}nav a.on,nav a:hover{color:var(--txt);background:#232834}
+.sp{flex:1}button,select,input{background:#232834;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit}
+button{cursor:pointer}button:hover{border-color:var(--acc)}button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+main{padding:16px}.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.tile .h{display:flex;justify-content:space-between;padding:6px 10px;color:var(--mut)}
+.tile img{width:100%;display:block;aspect-ratio:16/9;background:#000;object-fit:contain}.tile .c{display:flex;gap:6px;flex-wrap:wrap;padding:8px}
+table{width:100%;border-collapse:collapse}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.chip{padding:2px 8px;border-radius:99px;background:#232834;color:var(--mut)}.ok{color:#3fb950}.bad{color:#f85149}
+@media(max-width:600px){main{padding:8px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+{% if session %}
+<header><b>CFTV Portal</b>
+<nav><a href="/live" class="{{ 'on' if page=='live' }}">Ao vivo</a><a href="/playback" class="{{ 'on' if page=='playback' }}">Gravacoes</a><a href="/events" class="{{ 'on' if page=='events' }}">Eventos</a></nav>
+<span class="sp"></span><span class="chip">{{ session.username }} ({{ session.role }})</span><button onclick="logout()">Sair</button></header>
+{% endif %}
+<main>{% block body %}{% endblock %}</main>
+<script>
+const CSRF={{ csrf|tojson }};
+async function api(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':CSRF},body:JSON.stringify(body||{})});return r.json().catch(()=>({}))}
+async function logout(){await fetch('/logout',{method:'POST',headers:{'X-CSRF-Token':CSRF}});location='/login'}
+</script>
+{% block script %}{% endblock %}
+</body></html>

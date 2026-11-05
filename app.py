@@ -47,7 +47,7 @@ def run_splash() -> None:
     loop.exec()
 
 
-def choose_profile() -> Optional[Profile]:
+def choose_profile() -> Optional[tuple[Profile, str, str]]:
     """StartDialog -> assistente (novo) ou perfil salvo. ``None`` = usuario cancelou."""
     dlg = StartDialog()
     if not dlg.exec() or not dlg.choice:
@@ -55,7 +55,8 @@ def choose_profile() -> Optional[Profile]:
     kind, name = dlg.choice
     if kind == "open" and name:
         try:
-            return load_profile(name)
+            prof = load_profile(name)
+            return prof, *ask_password(prof)
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(None, "Perfil", f"Nao foi possivel abrir '{name}':\n{exc}")
             return choose_profile()
@@ -66,7 +67,35 @@ def choose_profile() -> Optional[Profile]:
     if prof is None:
         return None
     save_profile(prof)
-    return prof
+    user, pw = wiz.result_credentials()
+    if pw:
+        from core import credentials
+        credentials.save(prof.name, pw)
+    return prof, user, pw
+
+
+def ask_password(profile: Profile) -> tuple[str, str]:
+    """Perfil salvo nao guarda a senha: pergunta (so memoria) para exibir as URLs reais."""
+    from PyQt6.QtWidgets import QInputDialog, QLineEdit
+    from core.security import UserStore
+    dev = profile.devices[0]
+    admin = next((u.username for u in dev.users if u.role == "admin"), "admin")
+    store = UserStore(dev.users, realms=[dev.realm])
+    from core import credentials
+    saved = credentials.load(profile.name)
+    if saved and store.verify(admin, saved):
+        return admin, saved
+    for _ in range(3):
+        pw, ok = QInputDialog.getText(None, "Senha do administrador",
+                                      f"Senha de '{admin}' (so para mostrar as URLs; nao e gravada):",
+                                      QLineEdit.EchoMode.Password)
+        if not ok or not pw:
+            return admin, ""
+        if store.verify(admin, pw):
+            credentials.save(profile.name, pw)
+            return admin, pw
+        QMessageBox.warning(None, "Senha", "Senha incorreta.")
+    return admin, ""
 
 
 def ensure_free_ports(profile: Profile) -> None:
@@ -90,9 +119,10 @@ def ensure_free_ports(profile: Profile) -> None:
                             "\n\nNovas portas foram escolhidas automaticamente.")
 
 
-def start_context(profile: Profile) -> Optional[AppContext]:
+def start_context(profile: Profile, user: str = "admin", password: str = "") -> Optional[AppContext]:
     """Cria o contexto e inicia os equipamentos em thread de trabalho (a UI nao congela)."""
     ctx = AppContext(profile)
+    ctx.set_credentials(user, password)
     dlg = QDialog()
     dlg.setWindowTitle("CFTV Simulator")
     dlg.setMinimumWidth(380)
@@ -130,14 +160,15 @@ def main() -> int:
     run_splash()
     code = 0
     while True:
-        profile = choose_profile()
-        if profile is None:
+        chosen = choose_profile()
+        if chosen is None:
             break
+        profile, adm_user, adm_pw = chosen
         brands = {d.brand.value for d in profile.devices}
         accent = ACCENTS[next(iter(brands))] if len(brands) == 1 else ACCENTS["all"]
         apply_theme(app, next(iter(brands)) if len(brands) == 1 else "all")
         ensure_free_ports(profile)
-        ctx = start_context(profile)
+        ctx = start_context(profile, adm_user, adm_pw)
         if ctx is None:
             continue
         win = MainWindow(ctx, accent)

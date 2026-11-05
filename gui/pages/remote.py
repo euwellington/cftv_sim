@@ -27,6 +27,7 @@ class RemotePage(BasePage):
         self.provider.addItem("Cloudflare Tunnel (quick tunnel)", "cloudflare")
         self.provider.addItem("ngrok", "ngrok")
         self.provider.addItem("Tailscale Funnel", "tailscale")
+        self.provider.addItem("TCP publico sem conta - bore/pinggy (RTSP/HTTP de fora)", "bore")
         idx = self.provider.findData(self.ctx.profile.public.provider)
         self.provider.setCurrentIndex(max(0, idx))
         self.status = QLabel("Parado")
@@ -37,8 +38,8 @@ class RemotePage(BasePage):
         ll.addWidget(self.provider)
         ll.addWidget(self.status)
         ll.addWidget(self.btn)
-        warn = QLabel("O tunel expoe somente o portal web (HTTPS). RTSP cru nao passa por tunel HTTP: "
-                      "o video externo vai por HLS/WebRTC. As APIs ISAPI/CGI so sao expostas se voce marcou isso no perfil.")
+        warn = QLabel("O tunel expoe o portal web (HTTPS). RTSP cru nao passa por tunel HTTP: use o portal para ver o video, "
+                      "ou ngrok com TCP (Configuracoes > Acesso) para abrir o RTSP no VLC. Na rede Tailscale, use o IP 100.x da maquina.")
         warn.setObjectName("Muted")
         warn.setWordWrap(True)
         ll.addWidget(warn)

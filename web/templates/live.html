@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block body %}
+<div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+<label>Qualidade <select id="q" onchange="setQ()"><option value="sub">Extra (leve)</option><option value="main">Principal</option></select></label>
+<span id="tun" class="chip">{{ 'tunel: ' ~ ctx.public_url if ctx.public_url else 'tunel: off' }}</span><span id="ev" class="chip">sem eventos</span></div>
+<div class="grid">
+{% for c in cams %}
+<div class="tile" data-dev="{{ c.dev }}" data-ch="{{ c.ch }}">
+<div class="h"><span>{{ c.device }} - {{ c.name }}</span><span class="chip" id="st-{{ c.dev }}-{{ c.ch }}">{{ c.brand }}</span></div>
+<img class="v" src="/stream/{{ c.dev }}/{{ c.ch }}.mjpg?q=sub" alt="{{ c.name }}">
+<div class="c">
+<a href="/snapshot/{{ c.dev }}/{{ c.ch }}.jpg"><button>Foto</button></a>
+{% if can_control %}
+<button onclick="ptz('{{ c.dev }}',{{ c.ch }},0,1,0)">&#9650;</button><button onclick="ptz('{{ c.dev }}',{{ c.ch }},0,-1,0)">&#9660;</button>
+<button onclick="ptz('{{ c.dev }}',{{ c.ch }},-1,0,0)">&#9664;</button><button onclick="ptz('{{ c.dev }}',{{ c.ch }},1,0,0)">&#9654;</button>
+<button onclick="ptz('{{ c.dev }}',{{ c.ch }},0,0,1)">+</button><button onclick="ptz('{{ c.dev }}',{{ c.ch }},0,0,-1)">&minus;</button>
+<button onclick="api('/api/v1/ptz',{dev:'{{ c.dev }}',ch:{{ c.ch }},action:'home'})">Home</button>
+<button onclick="rec('{{ c.dev }}',{{ c.ch }},this)">&#9679; Gravar</button>
+{% if session.role == 'admin' %}<button onclick="if(confirm('Reiniciar?'))api('/api/v1/reboot',{dev:'{{ c.dev }}',ch:{{ c.ch }}})">Reiniciar</button>{% endif %}
+{% endif %}
+</div></div>
+{% endfor %}
+</div>
+{% endblock %}
+{% block script %}
+<script>
+function setQ(){const q=document.getElementById('q').value;document.querySelectorAll('.tile').forEach(t=>{t.querySelector('img.v').src=`/stream/${t.dataset.dev}/${t.dataset.ch}.mjpg?q=${q}&t=${Date.now()}`})}
+function ptz(d,c,x,y,z){api('/api/v1/ptz',{dev:d,ch:c,x:x,y:y,z:z});setTimeout(()=>api('/api/v1/ptz',{dev:d,ch:c,action:'stop'}),600)}
+const recState={};async function rec(d,c,b){const k=d+c;recState[k]=!recState[k];await api('/api/v1/record',{dev:d,ch:c,on:recState[k]});b.style.background=recState[k]?'#b91c1c':''}
+(function ws(){const s=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
+s.onmessage=e=>{const v=JSON.parse(e.data);document.getElementById('ev').textContent=v.type+' CH'+v.channel};s.onclose=()=>setTimeout(ws,3000)})();
+</script>
+{% endblock %}

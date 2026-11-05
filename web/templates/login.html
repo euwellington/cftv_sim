@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Entrar - CFTV Portal{% endblock %}
+{% block body %}
+<form method="post" action="/login" style="max-width:340px;margin:12vh auto;background:var(--panel);padding:24px;border-radius:10px;border:1px solid var(--line);border-top:3px solid var(--acc)">
+<h2 style="margin-top:0">CFTV Portal</h2>
+<p style="color:var(--mut)">Ambiente de laboratorio / simulacao.</p>
+{% if error %}<p class="bad">{{ error }}</p>{% endif %}
+<input type="hidden" name="pre" value="{{ pre }}">
+<p><input name="username" placeholder="Usuario" autocomplete="username" required style="width:100%"></p>
+<p><input name="password" type="password" placeholder="Senha" autocomplete="current-password" required style="width:100%"></p>
+<button class="p" style="width:100%">Entrar</button>
+</form>
+{% endblock %}

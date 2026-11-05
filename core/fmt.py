@@ -60,3 +60,41 @@ def primary_ip() -> str:
     except Exception:  # noqa: BLE001
         ips = local_ips()
         return ips[0] if ips else "127.0.0.1"
+
+
+def hostname() -> str:
+    return socket.gethostname()
+
+
+def fetch_public_ip(timeout: float = 6.0) -> str:
+    """IP publico (consulta servicos externos). Levanta OSError se estiver sem internet."""
+    import urllib.request
+    last: Exception | None = None
+    for url in ("https://api.ipify.org", "https://ifconfig.me/ip", "https://icanhazip.com"):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as r:
+                ip = r.read().decode().strip()
+                if ip:
+                    return ip
+        except Exception as exc:  # noqa: BLE001
+            last = exc
+    raise OSError(f"nao foi possivel obter o IP publico: {last}")
+
+
+def tailscale_ip() -> str:
+    """IPv4 do Tailscale desta maquina (100.x), ou "" se nao instalado/conectado."""
+    import shutil
+    import subprocess
+    exe = shutil.which("tailscale")
+    if not exe:
+        for p in (r"C:\Program Files\Tailscale\tailscale.exe", "/usr/bin/tailscale"):
+            import os
+            if os.path.exists(p):
+                exe = p
+    if not exe:
+        return ""
+    try:
+        r = subprocess.run([exe, "ip", "-4"], capture_output=True, text=True, timeout=5)
+        return r.stdout.split()[0] if r.returncode == 0 and r.stdout.split() else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""

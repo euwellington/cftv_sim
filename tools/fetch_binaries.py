@@ -158,6 +158,27 @@ def fetch_cloudflared(force: bool) -> str | None:
     return f"{a['name']}  sha256={hashlib.sha256(data).hexdigest()}"
 
 
+def fetch_bore(force: bool) -> str | None:
+    """bore (https://github.com/ekzhang/bore): cliente de tunel TCP gratuito (servidor publico bore.pub, sem conta)."""
+    dest = BIN / f"bore{EXE}"
+    if dest.exists() and not force:
+        print("[ok] bore ja existe")
+        return None
+    arch = {"amd64": "x86_64", "arm64": "aarch64"}.get(_arch(), _arch())
+    assets = github_latest_assets("ekzhang/bore")
+    if IS_WIN:
+        a = pick_asset(assets, "windows", arch, suffixes=(".zip",))
+    elif _os() == "darwin":
+        a = pick_asset(assets, "apple-darwin", arch, suffixes=(".tar.gz",))
+    else:
+        a = pick_asset(assets, "linux", arch, suffixes=(".tar.gz",))
+    data = http_get(a["browser_download_url"], a["name"])
+    extract_member(data, a["name"], f"bore{EXE}", dest)
+    make_executable(dest)
+    print(f"[ok] bore -> {dest}")
+    return f"{a['name']}  sha256={hashlib.sha256(data).hexdigest()}"
+
+
 def fetch_ffmpeg(force: bool) -> str | None:
     dest = BIN / f"ffmpeg{EXE}"
     if dest.exists() and not force:
@@ -204,7 +225,7 @@ def fetch_ffmpeg(force: bool) -> str | None:
     raise RuntimeError("macOS: instale com `brew install ffmpeg`")
 
 
-FETCHERS = {"mediamtx": fetch_mediamtx, "ffmpeg": fetch_ffmpeg, "cloudflared": fetch_cloudflared}
+FETCHERS = {"mediamtx": fetch_mediamtx, "ffmpeg": fetch_ffmpeg, "cloudflared": fetch_cloudflared, "bore": fetch_bore}
 
 
 def main() -> int:

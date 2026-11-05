@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+<table><thead><tr><th>Hora</th><th>Equipamento</th><th>CH</th><th>Tipo</th><th>Estado</th></tr></thead><tbody id="rows"></tbody></table>
+{% endblock %}
+{% block script %}
+<script>
+async function load(){const j=await (await fetch('/api/v1/events?limit=200')).json();
+document.getElementById('rows').innerHTML=j.map(x=>`<tr><td>${x.ts}</td><td>${x.device}</td><td>${x.channel}</td><td>${x.type}</td><td>${x.state}</td></tr>`).join('')}
+load();(function ws(){const s=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');s.onmessage=()=>setTimeout(load,300);s.onclose=()=>setTimeout(ws,3000)})();
+</script>
+{% endblock %}
